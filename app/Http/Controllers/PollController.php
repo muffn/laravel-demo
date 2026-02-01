@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Poll;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PollController extends Controller
 {
@@ -31,9 +33,46 @@ class PollController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        //
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'options' => 'required|array|min:1',
+            'options.*' => 'string|max:255',
+        ]);
+
+        $options = array_values(array_filter(array_map('trim', $data['options'] ?? []), function ($opt) {
+            return $opt !== '';
+        }));
+
+        if (count($options) === 0) {
+            return redirect()->back()->withInput()->withErrors(['options' => 'Please provide at least one non-empty option.']);
+        }
+
+        $poll = DB::transaction(function () use ($data, $options) {
+            $poll = Poll::create([
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'user_id' => auth()->id(),
+            ]);
+
+            $payload = [];
+            foreach ($options as $index => $text) {
+                $payload[] = [
+                    'option_text' => $text,
+                    'order' => $index,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            $poll->options()->createMany($payload);
+
+            return $poll;
+        });
+
+        return redirect()->to(url('/'))->with('success', 'Poll created successfully.');
     }
 
     /**
