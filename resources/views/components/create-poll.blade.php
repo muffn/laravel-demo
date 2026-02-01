@@ -31,9 +31,11 @@
                         type="text"
                         name="title"
                         value="{{ old('title') }}"
-                        class="input input-bordered w-full"
+                        class="input input-bordered w-full
+                        @error('message') input-error @enderror"
                         placeholder="Enter poll title"
                         required
+                        maxlength="255"
                     />
                     @error('title')
                     <p class="text-sm text-error mt-1">{{ $message }}</p>
@@ -77,7 +79,8 @@
                                 type="text"
                                 name="options[]"
                                 value="{{ $opt }}"
-                                class="input input-bordered w-full"
+                                class="input input-bordered w-full
+                                @error('options.' . $idx) input-error @enderror"
                                 placeholder="Option text"
                                 required
                             />
