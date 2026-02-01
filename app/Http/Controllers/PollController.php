@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Poll;
 use Illuminate\Http\Request;
 
 class PollController extends Controller
@@ -12,54 +13,10 @@ class PollController extends Controller
 
     public function index()
     {
-        $polls = [
-            [
-                'id' => 1,
-                'author' => 'Jane Doe',
-                'title' => 'What is your favorite programming language?',
-                'description' => 'A poll about your favorite programming languages.',
-                'options' => array(
-                    [
-                        'label' => 'Python',
-                        'votes' => 120
-                    ],
-                    [
-                        'label' => 'JavaScript',
-                        'votes' => 95
-                    ],
-                    [
-                        'label' => 'Java',
-                        'votes' => 60
-                    ],
-                    [
-                        'label' => 'C#',
-                        'votes' => 45
-                    ]
-                )],
-            [
-                'id' => 2,
-                'author' => 'John Smith',
-                'title' => 'What is your preferred travel destination?',
-                'description' => 'A poll about preferred travel destinations.',
-                'options' => array(
-                    [
-                        'label' => 'Beach',
-                        'votes' => 80
-                    ],
-                    [
-                        'label' => 'Mountains',
-                        'votes' => 70
-                    ],
-                    [
-                        'label' => 'City',
-                        'votes' => 50
-                    ],
-                    [
-                        'label' => 'Countryside',
-                        'votes' => 30
-                    ]
-                )]
-        ];
+        $polls = Poll::with(['user', 'options', 'votes'])
+            ->latest()
+            ->take(50)
+            ->get();
         return view('home', ['polls' => $polls]);
     }
 
