@@ -36,7 +36,7 @@ return new class extends Migration
             $table->foreignId('poll_option_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('voter_name')->nullable();
-            $table->enum('vote_type', ['yes', 'no', 'maybe', 'no_answer']);
+            $table->enum('vote_type', ['yes', 'no', 'maybe']);
             $table->timestamps();
         });
     }

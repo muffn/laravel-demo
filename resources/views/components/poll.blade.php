@@ -29,13 +29,11 @@
                                     $voteType = $vote?->vote_type;
                                 @endphp
                                 @if($voteType === 'yes')
-                                    <span class="badge badge-success">✓ Yes</span>
+                                    <span class="badge badge-success">✅</span>
                                 @elseif($voteType === 'no')
-                                    <span class="badge badge-error">✗ No</span>
+                                    <span class="badge badge-error">❌</span>
                                 @elseif($voteType === 'maybe')
-                                    <span class="badge badge-warning">? Maybe</span>
-                                @elseif($voteType === 'no_answer')
-                                    <span class="badge badge-ghost">— No Answer</span>
+                                    <span class="badge badge-ghost">⚠️</span>
                                 @else
                                     <span class="badge badge-outline">—</span>
                                 @endif
