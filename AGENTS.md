@@ -1,4 +1,16 @@
 <laravel-boost-guidelines>
+=== .ai/project-guidelines rules ===
+
+# Project Guidelines
+
+## General
+
+* Use strict types where possible.
+
+* Use latest code standards
+
+* Use latest laravel features
+
 === foundation rules ===
 
 # Laravel Boost Guidelines
