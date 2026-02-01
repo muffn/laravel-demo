@@ -35,12 +35,18 @@ class PollController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'options' => 'required|array|min:1',
-            'options.*' => 'string|max:255',
-        ]);
+        $data = $request->validate(
+            [
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'options' => 'required|array|min:1',
+                'options.*' => 'string|required|max:255',
+            ],
+            [
+                'title.required' => 'The poll title is required.',
+                'options.*' => 'Each option must be a string.',
+                'options.*.required' => 'Each option must be a non-empty string.'
+            ]);
 
         $options = array_values(array_filter(array_map('trim', $data['options'] ?? []), function ($opt) {
             return $opt !== '';
@@ -72,7 +78,7 @@ class PollController extends Controller
             return $poll;
         });
 
-        return redirect()->to(url('/'))->with('success', 'Poll created successfully.');
+        return redirect()->to(url('/'))->with('success', 'Poll created successfully!');
     }
 
     /**
