@@ -1,31 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePollRequest;
 use App\Models\Poll;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class PollController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-
-    public function index()
+    public function index(): View
     {
         $polls = Poll::with(['user', 'options', 'votes'])
             ->latest()
             ->take(50)
             ->get();
+
         return view('home', ['polls' => $polls]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): void
     {
         //
     }
@@ -33,30 +36,19 @@ class PollController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StorePollRequest $request): RedirectResponse
     {
-        $data = $request->validate(
-            [
-                'title' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'options' => 'required|array|min:1',
-                'options.*' => 'string|required|max:255',
-            ],
-            [
-                'title.required' => 'The poll title is required.',
-                'options.*' => 'Each option must be a string.',
-                'options.*.required' => 'Each option must be a non-empty string.'
-            ]);
-
-        $options = array_values(array_filter(array_map('trim', $data['options'] ?? []), function ($opt) {
-            return $opt !== '';
-        }));
+        $data = $request->validated();
+        $options = $request->validatedOptions();
 
         if (count($options) === 0) {
-            return redirect()->back()->withInput()->withErrors(['options' => 'Please provide at least one non-empty option.']);
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['options' => 'Please provide at least one non-empty option.']);
         }
 
-        $poll = DB::transaction(function () use ($data, $options) {
+        $poll = DB::transaction(function () use ($data, $options): Poll {
             $poll = Poll::create([
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
@@ -84,7 +76,7 @@ class PollController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id): void
     {
         //
     }
@@ -92,7 +84,7 @@ class PollController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(string $id): void
     {
         //
     }
@@ -100,7 +92,7 @@ class PollController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(StorePollRequest $request, string $id): void
     {
         //
     }
@@ -108,11 +100,8 @@ class PollController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): void
     {
         //
     }
 }
-
-
-namespace App\Http\Controllers;
