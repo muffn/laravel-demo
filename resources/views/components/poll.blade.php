@@ -1,4 +1,4 @@
-@props(['poll'])
+@props(['poll', 'votable' => false, 'voteUrl' => null])
 
 <div class="card bg-base-100 shadow mb-4">
     <div class="card-body">
@@ -8,6 +8,12 @@
             {{ $poll['created_at']->diffForHumans() }}
             by {{ $poll->user ? $poll->user->name : 'Anonymous' }}</p>
         <div class="divider my-2"></div>
+
+        @if($votable && $voteUrl)
+            <form action="{{ $voteUrl }}" method="POST" id="vote-form">
+                @csrf
+        @endif
+
         <div class="overflow-x-auto">
             <table class="table table-zebra w-full">
                 <thead>
@@ -16,6 +22,9 @@
                     @foreach($poll['options'] as $option)
                         <th class="font-bold text-center">{{ $option['option_text'] }}</th>
                     @endforeach
+                    @if($votable)
+                        <th></th>
+                    @endif
                 </tr>
                 </thead>
                 <tbody>
@@ -39,10 +48,62 @@
                                 @endif
                             </td>
                         @endforeach
+                        @if($votable)
+                            <td></td>
+                        @endif
                     </tr>
                 @endforeach
+
+                @if($votable)
+                    <tr class="bg-base-200">
+                        <td>
+                            <input
+                                type="text"
+                                name="voter_name"
+                                value="{{ old('voter_name') }}"
+                                placeholder="Your name"
+                                class="input input-bordered input-sm w-full min-w-32 @error('voter_name') input-error @enderror"
+                                required
+                            >
+                        </td>
+                        @foreach($poll['options'] as $option)
+                            <td class="text-center">
+                                <div class="flex flex-col gap-1 items-center">
+                                    <label class="cursor-pointer flex items-center gap-1">
+                                        <input type="radio" name="votes[{{ $option['id'] }}]" value="yes" class="radio radio-success radio-xs" {{ old("votes.{$option['id']}") === 'yes' ? 'checked' : '' }} required>
+                                        <span class="text-xs">Yes</span>
+                                    </label>
+                                    <label class="cursor-pointer flex items-center gap-1">
+                                        <input type="radio" name="votes[{{ $option['id'] }}]" value="maybe" class="radio radio-warning radio-xs" {{ old("votes.{$option['id']}") === 'maybe' ? 'checked' : '' }}>
+                                        <span class="text-xs">Maybe</span>
+                                    </label>
+                                    <label class="cursor-pointer flex items-center gap-1">
+                                        <input type="radio" name="votes[{{ $option['id'] }}]" value="no" class="radio radio-error radio-xs" {{ old("votes.{$option['id']}") === 'no' ? 'checked' : '' }}>
+                                        <span class="text-xs">No</span>
+                                    </label>
+                                </div>
+                            </td>
+                        @endforeach
+                        <td>
+                            <button type="submit" class="btn btn-primary btn-sm">Vote</button>
+                        </td>
+                    </tr>
+                @endif
                 </tbody>
             </table>
         </div>
+
+        @if($votable)
+            @error('voter_name')
+                <div class="text-error text-sm mt-2">{{ $message }}</div>
+            @enderror
+            @error('votes')
+                <div class="text-error text-sm mt-2">{{ $message }}</div>
+            @enderror
+        @endif
+
+        @if($votable && $voteUrl)
+            </form>
+        @endif
     </div>
 </div>

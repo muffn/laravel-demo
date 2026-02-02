@@ -3,7 +3,7 @@
         Admin - {{ $poll->title }}
     </x-slot:title>
 
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-4xl mx-auto">
         <div class="card bg-base-100 shadow mb-4">
             <div class="card-body">
                 <h1 class="card-title text-2xl font-bold text-primary">Poll Admin</h1>
