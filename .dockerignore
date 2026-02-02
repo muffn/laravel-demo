@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+
+# Development
+.env
+.env.local
+.env.*.local
+.phpunit.result.cache
+phpunit.xml
+.php-cs-fixer.cache
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Dependencies (built in Docker)
+/node_modules
+/vendor
+
+# Build artifacts (built in Docker)
+/public/build
+/public/hot
+
+# Storage (mounted as volume)
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+
+# Database (mounted as volume)
+/database/*.sqlite
+
+# Documentation
+*.md
+!README.md
+
+# Tests
+/tests
+/.phpunit.cache
+
+# Docker
+docker-compose*.yml
+Dockerfile
