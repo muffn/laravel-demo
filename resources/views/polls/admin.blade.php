@@ -19,7 +19,7 @@
                         <p class="text-sm text-base-content/60 mb-2">Share this link with people you want to vote on your poll.</p>
                         <div class="join w-full">
                             <input type="text" value="{{ $poll->participant_url }}" readonly class="input input-bordered join-item w-full" id="participant-url">
-                            <button class="btn btn-primary join-item" onclick="copyToClipboard('participant-url')">
+                            <button class="btn btn-primary join-item copy-btn" onclick="copyToClipboard(this, 'participant-url')">
                                 Copy
                             </button>
                         </div>
@@ -32,7 +32,7 @@
                         <p class="text-sm text-base-content/60 mb-2">Keep this link private. Use it to manage your poll.</p>
                         <div class="join w-full">
                             <input type="text" value="{{ $poll->admin_url }}" readonly class="input input-bordered join-item w-full" id="admin-url">
-                            <button class="btn btn-secondary join-item" onclick="copyToClipboard('admin-url')">
+                            <button class="btn btn-secondary join-item copy-btn" onclick="copyToClipboard(this, 'admin-url')">
                                 Copy
                             </button>
                         </div>
@@ -45,9 +45,16 @@
     </div>
 
     <script>
-        function copyToClipboard(elementId) {
+        function copyToClipboard(btn, elementId) {
             const input = document.getElementById(elementId);
             navigator.clipboard.writeText(input.value);
+
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+
+            setTimeout(function() {
+                btn.textContent = originalText;
+            }, 2000);
         }
     </script>
 </x-layout>
