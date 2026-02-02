@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Vote extends Model
 {
     protected $fillable = [
+        'poll_option_id',
         'vote_type',
         'voter_name',
     ];

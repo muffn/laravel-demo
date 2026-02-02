@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePollRequest;
+use App\Http\Requests\StoreVoteRequest;
 use App\Models\Poll;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -70,7 +71,7 @@ class PollController extends Controller
             return $poll;
         });
 
-        return redirect()->to(url('/'))->with('success', 'Poll created successfully!');
+        return redirect()->to($poll->admin_url)->with('success', 'Poll created successfully!');
     }
 
     /**
@@ -103,5 +104,59 @@ class PollController extends Controller
     public function destroy(string $id): void
     {
         //
+    }
+
+    /**
+     * Display the participate page for voting.
+     */
+    public function participate(string $participant_token): View
+    {
+        $poll = Poll::where('participant_token', $participant_token)
+            ->with(['user', 'options', 'votes'])
+            ->firstOrFail();
+
+        return view('polls.participate', ['poll' => $poll]);
+    }
+
+    /**
+     * Display the admin page for poll management.
+     */
+    public function admin(string $admin_token): View
+    {
+        $poll = Poll::where('admin_token', $admin_token)
+            ->with(['user', 'options', 'votes'])
+            ->firstOrFail();
+
+        return view('polls.admin', ['poll' => $poll]);
+    }
+
+    /**
+     * Store a vote for a poll.
+     */
+    public function vote(StoreVoteRequest $request, string $participant_token): RedirectResponse
+    {
+        $poll = Poll::where('participant_token', $participant_token)
+            ->with('options')
+            ->firstOrFail();
+
+        $data = $request->validated();
+
+        DB::transaction(function () use ($poll, $data) {
+            // Delete existing votes from this voter
+            $poll->votes()->where('voter_name', $data['voter_name'])->delete();
+
+            // Create new votes
+            foreach ($data['votes'] as $optionId => $voteType) {
+                $poll->votes()->create([
+                    'poll_option_id' => $optionId,
+                    'voter_name' => $data['voter_name'],
+                    'vote_type' => $voteType,
+                ]);
+            }
+        });
+
+        return redirect()
+            ->route('polls.participate', $participant_token)
+            ->with('success', 'Your vote has been recorded!');
     }
 }
