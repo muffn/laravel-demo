@@ -14,9 +14,5 @@
         </div>
 
         <x-create-poll />
-
-        @foreach($polls as $poll)
-            <x-poll :poll="$poll" />
-        @endforeach
     </div>
 </x-layout>
