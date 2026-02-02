@@ -2,6 +2,8 @@
     Create Poll
 </x-slot:title>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 <div class="max-w-2xl mx-auto my-8">
     <div class="card bg-base-100 shadow">
         <div class="card-body">
@@ -79,7 +81,7 @@
                                     type="text"
                                     name="options[]"
                                     value="{{ $opt }}"
-                                    class="input input-bordered w-full @error('options.' . $idx) input-error @enderror"
+                                    class="input input-bordered w-full option-text @error('options.' . $idx) input-error @enderror"
                                     placeholder="Option text"
                                     required
                                     maxlength="255"
@@ -90,6 +92,12 @@
                                     </label>
                                 @enderror
                             </div>
+                            <button
+                                type="button"
+                                class="btn btn-square btn-sm btn-ghost pick-datetime"
+                                aria-label="Pick date and time"
+                                title="Pick date and time"
+                            >📅</button>
                             <button
                                 type="button"
                                 class="btn btn-square btn-sm btn-ghost remove-option"
@@ -110,8 +118,9 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-(function () {
+(function() {
     const addBtn = document.getElementById('add-option');
     const list = document.getElementById('options-list');
 
@@ -120,6 +129,43 @@
         div.textContent = text;
         return div.innerHTML;
     }
+
+    function formatDateTime(date) {
+        return date.toLocaleString(undefined, {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+    }
+
+    function initDatePicker(btn) {
+        if (btn._flatpickr) return;
+
+        const row = btn.closest('.option-row');
+        const textInput = row.querySelector('.option-text');
+
+        // Prevent the button from submitting the form
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        flatpickr(btn, {
+            enableTime: true,
+            dateFormat: 'Y-m-d H:i',
+            time_24hr: true,
+            onChange: function(selectedDates) {
+                if (selectedDates.length > 0) {
+                    textInput.value = formatDateTime(selectedDates[0]);
+                }
+            }
+        });
+    }
+
+    // Initialize existing date pickers
+    document.querySelectorAll('.pick-datetime').forEach(initDatePicker);
 
     function createOptionRow(value = '') {
         const wrapper = document.createElement('div');
@@ -130,7 +176,7 @@
                     type="text"
                     name="options[]"
                     value="${escapeHtml(value)}"
-                    class="input input-bordered w-full"
+                    class="input input-bordered w-full option-text"
                     placeholder="Option text"
                     required
                     maxlength="255"
@@ -138,31 +184,45 @@
             </div>
             <button
                 type="button"
+                class="btn btn-square btn-sm btn-ghost pick-datetime"
+                aria-label="Pick date and time"
+                title="Pick date and time"
+            >📅</button>
+            <button
+                type="button"
                 class="btn btn-square btn-sm btn-ghost remove-option"
                 aria-label="Remove option"
             >✕</button>
         `;
+
+        // Initialize date picker for the new row
+        const btn = wrapper.querySelector('.pick-datetime');
+        initDatePicker(btn);
+
         return wrapper;
     }
 
     addBtn.addEventListener('click', function () {
         const newRow = createOptionRow();
         list.appendChild(newRow);
-        newRow.querySelector('input').focus();
+        newRow.querySelector('.option-text').focus();
     });
 
     list.addEventListener('click', function (e) {
         const removeBtn = e.target.closest('.remove-option');
-        if (!removeBtn) {
-            return;
+        if (removeBtn) {
+            const rows = list.querySelectorAll('.option-row');
+            if (rows.length > 1) {
+                removeBtn.closest('.option-row').remove();
+            }
         }
+    });
 
-        const rows = list.querySelectorAll('.option-row');
-        if (rows.length <= 1) {
-            return;
+    // Prevent form submission when pressing Enter in option inputs
+    list.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.classList.contains('option-text')) {
+            e.preventDefault();
         }
-
-        removeBtn.closest('.option-row').remove();
     });
 })();
 </script>
