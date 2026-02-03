@@ -29,39 +29,12 @@ RUN composer dump-autoload --optimize --no-dev
 # Production image
 FROM php:8.3-fpm-alpine AS production
 
-# Install runtime dependencies
-RUN apk add --no-cache \
-    nginx \
-    supervisor \
-    sqlite \
-    curl \
-    zip \
-    unzip \
-    libpng \
-    libjpeg-turbo \
-    freetype \
-    oniguruma \
-    libxml2
+# Install system dependencies
+RUN apk add --no-cache nginx supervisor sqlite curl
 
-# Install build dependencies, PHP extensions, then cleanup
-RUN apk add --no-cache --virtual .build-deps \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    oniguruma-dev \
-    libxml2-dev \
-    linux-headers \
-    $PHPIZE_DEPS \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        pdo_mysql \
-        pdo_sqlite \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-        gd \
-        opcache \
+# Install PHP extensions needed for Laravel
+RUN apk add --no-cache --virtual .build-deps sqlite-dev \
+    && docker-php-ext-install pdo_sqlite bcmath opcache \
     && apk del .build-deps
 
 # Configure PHP for production
