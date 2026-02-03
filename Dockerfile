@@ -27,7 +27,7 @@ RUN composer dump-autoload --optimize --no-dev
 
 
 # Production image
-FROM php:8.3-fpm-alpine AS production
+FROM php:8.5-fpm-alpine AS production
 
 # Install system dependencies
 RUN apk add --no-cache nginx supervisor sqlite curl
