@@ -29,7 +29,7 @@ RUN composer dump-autoload --optimize --no-dev
 # Production image
 FROM php:8.3-fpm-alpine AS production
 
-# Install system dependencies
+# Install system dependencies and PHP extensions
 RUN apk add --no-cache \
     nginx \
     supervisor \
@@ -37,21 +37,33 @@ RUN apk add --no-cache \
     curl \
     zip \
     unzip \
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    oniguruma \
+    libxml2 \
+    # Build dependencies (will be removed after)
+    && apk add --no-cache --virtual .build-deps \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
     oniguruma-dev \
     libxml2-dev \
+    linux-headers \
+    $PHPIZE_DEPS \
+    # Configure and install PHP extensions
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-        pdo_mysql \
-        pdo_sqlite \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-        gd \
-        opcache
+    pdo_mysql \
+    pdo_sqlite \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    opcache \
+    # Remove build dependencies
+    && apk del .build-deps
 
 # Configure PHP for production
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
