@@ -34,7 +34,7 @@ RUN apk add --no-cache nginx supervisor sqlite curl
 
 # Install PHP extensions needed for Laravel
 RUN apk add --no-cache --virtual .build-deps sqlite-dev \
-    && docker-php-ext-install pdo_sqlite bcmath opcache \
+    && docker-php-ext-install pdo_sqlite \
     && apk del .build-deps
 
 # Configure PHP for production
