@@ -27,7 +27,7 @@ RUN composer dump-autoload --optimize --no-dev
 
 
 # Production image with FrankenPHP
-FROM dunglas/frankenphp:latest-php8.4-alpine AS production
+FROM dunglas/frankenphp:1-php8.5 AS production
 
 # Install PHP extensions needed for Laravel
 RUN install-php-extensions pcntl pdo_sqlite
