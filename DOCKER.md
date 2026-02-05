@@ -33,7 +33,7 @@ services:
     environment:
       - APP_KEY=${APP_KEY}
     volumes:
-      - app-database:/var/www/html/database
+      - app-database:/app/database
 
 volumes:
   app-database:
@@ -59,7 +59,7 @@ docker compose up -d
 ## Backup
 
 ```bash
-docker compose exec app cat /var/www/html/database/database.sqlite > backup.sqlite
+docker compose exec app cat /app/database/database.sqlite > backup.sqlite
 ```
 
 ## Logs

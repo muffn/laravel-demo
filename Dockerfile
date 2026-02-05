@@ -26,28 +26,16 @@ COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
 
-# Production image
-FROM php:8.5-fpm-alpine AS production
-
-# Install system dependencies
-RUN apk add --no-cache nginx supervisor sqlite curl
+# Production image with FrankenPHP
+FROM dunglas/frankenphp:latest-alpine AS production
 
 # Install PHP extensions needed for Laravel
-RUN apk add --no-cache --virtual .build-deps sqlite-dev \
-    && docker-php-ext-install pdo_sqlite \
-    && apk del .build-deps
+RUN install-php-extensions pcntl pdo_sqlite
 
-# Configure PHP for production
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-COPY docker/php.ini "$PHP_INI_DIR/conf.d/99-custom.ini"
+# Copy PHP configuration
+COPY docker/php.ini /usr/local/etc/php/conf.d/99-custom.ini
 
-# Configure nginx
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-
-# Configure supervisor
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-WORKDIR /var/www/html
+WORKDIR /app
 
 # Copy application files
 COPY --from=composer /app/vendor ./vendor
@@ -62,10 +50,6 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
     && chown -R www-data:www-data storage bootstrap/cache database \
     && chmod -R 775 storage bootstrap/cache
 
-# Create startup script
-COPY docker/start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
-
 EXPOSE 80
 
-CMD ["/usr/local/bin/start.sh"]
+ENTRYPOINT ["php", "artisan", "octane:frankenphp", "--host=0.0.0.0", "--port=80"]
